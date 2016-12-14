@@ -440,6 +440,7 @@ DexFile::DexFile(const uint8_t* base, size_t size,
                  MemMap* mem_map,
                  const OatDexFile* oat_dex_file)
     : begin_(base),
+      coverage_data_begin_(nullptr),
       size_(size),
       location_(location),
       location_checksum_(location_checksum),
@@ -465,11 +466,18 @@ DexFile::~DexFile() {
   // the global reference table is otherwise empty!
   // Remove the index if one were created.
   delete class_def_index_.LoadRelaxed();
+  if (coverage_data_begin_ != nullptr) {
+    delete coverage_data_begin_;
+  }
 }
 
 bool DexFile::Init(std::string* error_msg) {
   if (!CheckMagicAndVersion(error_msg)) {
     return false;
+  }
+  LOG(INFO) << "MiniTrace DexFile::Init " << location_ << " and size is " << size_;
+  if (size_ > 0) {
+    coverage_data_begin_ = new uint8_t[size_];
   }
   return true;
 }

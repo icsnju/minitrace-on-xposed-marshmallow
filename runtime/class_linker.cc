@@ -78,6 +78,7 @@
 #include "handle_scope-inl.h"
 #include "thread-inl.h"
 #include "utils.h"
+#include "mini_trace.h"
 #include "verifier/method_verifier.h"
 #include "well_known_classes.h"
 
@@ -1926,6 +1927,7 @@ mirror::Class* ClassLinker::DefineClass(Thread* self, const char* descriptor, si
    * at this point.
    */
   Dbg::PostClassPrepare(h_new_class.Get());
+  MiniTrace::PostClassPrepare(h_new_class.Get());
 
   return h_new_class.Get();
 }

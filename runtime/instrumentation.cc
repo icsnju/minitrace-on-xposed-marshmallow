@@ -76,6 +76,8 @@ void Instrumentation::InstallStubsForClass(mirror::Class* klass) {
   } else if (!klass->IsResolved()) {
     // We need the class to be resolved to install/uninstall stubs. Otherwise its methods
     // could not be initialized or linked with regards to class inheritance.
+  } else if (!klass->IsMiniTraceable()) {
+    // TODO: now only enable tracing for minitraceable methods
   } else {
     for (size_t i = 0, e = klass->NumDirectMethods(); i < e; i++) {
       InstallStubsForMethod(klass->GetDirectMethod(i, sizeof(void*)));

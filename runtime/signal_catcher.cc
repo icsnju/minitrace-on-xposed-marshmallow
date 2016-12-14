@@ -37,6 +37,7 @@
 #include "scoped_thread_state_change.h"
 #include "signal_set.h"
 #include "thread.h"
+#include "mini_trace.h"
 #include "thread_list.h"
 #include "utils.h"
 
@@ -156,6 +157,15 @@ void SignalCatcher::HandleSigQuit() {
 void SignalCatcher::HandleSigUsr1() {
   LOG(INFO) << "SIGUSR1 forcing GC (no HPROF)";
   Runtime::Current()->GetHeap()->CollectGarbage(false);
+  LOG(INFO) << "SIGUSR1 stoping MiniTrace";
+  MiniTrace::Stop();
+}
+
+
+void SignalCatcher::HandleSigUsr2() {
+  LOG(INFO) << "SIGUSR2 dumping coverage data begin";
+  MiniTrace::DumpCoverageData();
+  LOG(INFO) << "SIGUSR2 dumping coverage data end";
 }
 
 int SignalCatcher::WaitForSignal(Thread* self, SignalSet& signals) {
@@ -198,6 +208,7 @@ void* SignalCatcher::Run(void* arg) {
   SignalSet signals;
   signals.Add(SIGQUIT);
   signals.Add(SIGUSR1);
+  signals.Add(SIGUSR2);
 
   while (true) {
     int signal_number = signal_catcher->WaitForSignal(self, signals);
@@ -212,6 +223,9 @@ void* SignalCatcher::Run(void* arg) {
       break;
     case SIGUSR1:
       signal_catcher->HandleSigUsr1();
+      break;
+    case SIGUSR2:
+      signal_catcher->HandleSigUsr2();
       break;
     default:
       LOG(ERROR) << "Unexpected signal %d" << signal_number;

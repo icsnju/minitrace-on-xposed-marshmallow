@@ -381,6 +381,14 @@ inline const DexFile::CodeItem* ArtMethod::GetCodeItem() {
   return GetDeclaringClass()->GetDexFile().GetCodeItem(GetCodeItemOffset());
 }
 
+inline void ArtMethod::VisitPc(uint32_t dex_pc) {
+  GetDeclaringClass()->GetDexFile().VisitPc(GetCodeItemOffset(), dex_pc);
+}
+
+inline const uint8_t* ArtMethod::GetCoverageData() {
+  return GetDeclaringClass()->GetDexFile().GetCoverageData(GetCodeItemOffset());
+}
+
 inline bool ArtMethod::IsResolvedTypeIdx(uint16_t type_idx) {
   DCHECK(!IsProxyMethod(true));
   return GetDexCacheResolvedType(type_idx) != nullptr;

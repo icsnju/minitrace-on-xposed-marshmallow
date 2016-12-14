@@ -30,6 +30,7 @@ namespace interpreter {
 // - "dex_pc": the current pc.
 // - "shadow_frame": the current shadow frame.
 // - "currentHandlersTable": the current table of pointer to each instruction handler.
+// - "mini_trace": do mini trace
 
 // Advance to the next instruction and updates interpreter state.
 #define ADVANCE(_offset)                                                    \
@@ -39,6 +40,7 @@ namespace interpreter {
     dex_pc = static_cast<uint32_t>(static_cast<int32_t>(dex_pc) + disp);    \
     shadow_frame.SetDexPC(dex_pc);                                          \
     TraceExecution(shadow_frame, inst, dex_pc);                             \
+    if (UNLIKELY(mini_trace)) shadow_frame.GetMethod()->VisitPc(dex_pc);    \
     inst_data = inst->Fetch16(0);                                           \
     goto *currentHandlersTable[inst->Opcode(inst_data)];                    \
   } while (false)
@@ -152,6 +154,7 @@ JValue ExecuteGotoImpl(Thread* self, const DexFile::CodeItem* code_item, ShadowF
   }
   self->VerifyStack();
 
+  const bool mini_trace = shadow_frame.GetMethod()->IsMiniTraceable();
   uint32_t dex_pc = shadow_frame.GetDexPC();
   const Instruction* inst = Instruction::At(code_item->insns_ + dex_pc);
   uint16_t inst_data;

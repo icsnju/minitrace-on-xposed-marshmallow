@@ -703,6 +703,28 @@ class DexFile {
     }
   }
 
+  void VisitPc(const uint32_t code_off, uint32_t dex_pc) const {
+    if (code_off == 0) {
+      return; // native or abstract method
+    } else {
+      uint8_t* addr = coverage_data_begin_ + code_off + dex_pc;
+      *addr = 1;
+    }
+  }
+
+  bool IsMiniTraceable() const {
+    return coverage_data_begin_ != nullptr;
+  }
+
+  const uint8_t* GetCoverageData(const uint32_t code_off) const {
+    if (code_off == 0) {
+      return nullptr;  // native or abstract method
+    } else {
+      uint8_t* addr = coverage_data_begin_ + code_off;
+      return static_cast<const uint8_t*>(addr);
+    }
+  }
+
   const char* GetReturnTypeDescriptor(const ProtoId& proto_id) const {
     return StringByTypeIdx(proto_id.return_type_idx_);
   }
@@ -981,6 +1003,9 @@ class DexFile {
 
   // The base address of the memory mapping.
   const uint8_t* const begin_;
+
+  // The base address of coverage
+  uint8_t* coverage_data_begin_;
 
   // The size of the underlying memory allocation in bytes.
   const size_t size_;

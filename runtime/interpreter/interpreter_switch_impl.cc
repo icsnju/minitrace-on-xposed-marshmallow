@@ -51,6 +51,7 @@ namespace interpreter {
       instrumentation->DexPcMovedEvent(self, shadow_frame.GetThisObject(code_item->ins_size_),  \
                                        shadow_frame.GetMethod(), dex_pc);                       \
     }                                                                                           \
+    if (UNLIKELY(mini_trace)) shadow_frame.GetMethod()->VisitPc(dex_pc);                        \
   } while (false)
 
 template<bool do_access_check, bool transaction_active>
@@ -74,6 +75,7 @@ JValue ExecuteSwitchImpl(Thread* self, const DexFile::CodeItem* code_item,
                                         shadow_frame.GetMethod(), 0);
     }
   }
+  const bool mini_trace = shadow_frame.GetMethod()->IsMiniTraceable();
   const uint16_t* const insns = code_item->insns_;
   const Instruction* inst = Instruction::At(insns + dex_pc);
   uint16_t inst_data;

@@ -147,6 +147,20 @@ class ArtMethod FINAL {
     return (GetAccessFlags() & kAccNative) != 0;
   }
 
+  bool IsMiniTraceable() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+    return (GetAccessFlags() & kAccIsMiniTraceable) != 0;
+  }
+
+  void SetIsMiniTraceable() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+    DCHECK(!IsMiniTraceable());
+    SetAccessFlags(GetAccessFlags() | kAccIsMiniTraceable);
+  }
+
+  void ClearIsMiniTraceable() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
+    DCHECK(IsMiniTraceable());
+    SetAccessFlags(GetAccessFlags() & ~kAccIsMiniTraceable);
+  }
+
   bool ShouldNotInline() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_) {
     return (GetAccessFlags() & kAccDontInline) != 0;
   }
@@ -221,6 +235,10 @@ class ArtMethod FINAL {
     // Not called within a transaction.
     dex_code_item_offset_ = new_code_off;
   }
+
+  // MiniTrace
+  ALWAYS_INLINE void VisitPc(uint32_t dex_pc) SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
+  const uint8_t* GetCoverageData() SHARED_LOCKS_REQUIRED(Locks::mutator_lock_);
 
   // Number of 32bit registers that would be required to hold all the arguments
   static size_t NumArgRegisters(const StringPiece& shorty);
