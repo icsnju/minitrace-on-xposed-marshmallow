@@ -326,6 +326,7 @@ struct AbortState {
       }
     }
     DumpAllThreads(os, self);
+    MiniTrace::DumpCoverageData();
   }
 
   // No thread-safety analysis as we do explicitly test for holding the mutator lock.
