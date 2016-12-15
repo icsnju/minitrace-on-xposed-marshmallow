@@ -163,17 +163,27 @@ void MiniTrace::DumpCoverageData(std::ostream& os, ArtMethod* method) {
   }
   uint16_t insns_size = code_item->insns_size_in_code_units_;
 
+  uint8_t* data = const_cast<uint8_t*>(method->GetCoverageData());
+  if (data == nullptr) {
+    return;
+  }
+
+  if (insns_size == 0) {
+    return;
+  }
+
+  if (data[0] == 0) {
+    return;
+  }
+
   os << StringPrintf("%p\t%s\t%s\t%s\t%s\t%d\t", method,
       PrettyDescriptor(method->GetDeclaringClassDescriptor()).c_str(), method->GetName(),
       method->GetSignature().ToString().c_str(), method->GetDeclaringClassSourceFile(), insns_size);
 
-  const uint8_t* data = method->GetCoverageData();
-  if (data == nullptr) {
-    return;
-  }
   for (int i = 0; i < insns_size; i++) {
     if (data[i] > 0) {
       os << 1;
+      data[i] = 0; // clear after dump
     } else {
       os << 0;
     }
