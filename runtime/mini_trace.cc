@@ -365,6 +365,8 @@ void MiniTrace::Start() {
       runtime->GetInstrumentation()->AddListener(the_trace_, events);
       runtime->GetInstrumentation()->EnableMethodTracing(kMiniTracerInstrumentationKey);
 
+      CHECK(runtime->GetInstrumentation()->AreExitStubsInstalled());
+
       runtime->GetClassLinker()->VisitClasses(PostClassPrepareClassVisitor, NULL);
 
     }
